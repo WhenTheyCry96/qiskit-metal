@@ -713,7 +713,7 @@ class QHFSSRenderer(QAnsysRenderer):
         if self.pinfo:
             if self.pinfo.project:
                 if self.pinfo.design:
-                    if self.pinfo.design.solution_type == 'DrivenModal':
+                    if self.pinfo.design.solution_type == 'DrivenModal': #or self.pinfo.design.solution_type == "HFSS Hybrid Modal Network":
                         if self.pinfo.setup_name != setup_args.name:
                             self.design.logger.warning(
                                 f'The name of active setup={self.pinfo.setup_name} does not match'

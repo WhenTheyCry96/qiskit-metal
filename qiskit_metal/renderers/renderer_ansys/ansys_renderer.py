@@ -777,7 +777,7 @@ class QAnsysRenderer(QRendererAnalysis):
                     adesign = self.pinfo.project.new_q3d_design(design_name)
                 elif solution_type == "eigenmode":
                     adesign = self.pinfo.project.new_em_design(design_name)
-                elif solution_type == "drivenmodal":
+                elif solution_type == "drivenmodal":# or self.solution_type == "HFSS Hybrid Modal Network":
                     adesign = self.pinfo.project.new_dm_design(design_name)
                 else:
                     self.logger.error(
@@ -882,8 +882,10 @@ class QAnsysRenderer(QRendererAnalysis):
 
                 if self.pinfo.design.solution_type == "Eigenmode":
                     setup = self.add_eigenmode_setup(name, **other_setup)
-                elif self.pinfo.design.solution_type == "DrivenModal":
+                elif self.pinfo.design.solution_type == "DrivenModal":# or self.pinfo.design.solution_type == "HFSS Hybrid Modal Network":
                     setup = self.add_drivenmodal_setup(name, **other_setup)
+                elif self.pinfo.design.solution_type == "HFSS Hybrid Modal Network":
+                    setup = self.add_hybridmodalnetwork_setup(name, **other_setup)
                 elif self.pinfo.design.solution_type == "Q3D":
                     setup = self.add_q3d_setup(name, **other_setup)
         return setup
@@ -1758,17 +1760,19 @@ class QAnsysRenderer(QRendererAnalysis):
             self.epr_start(junctions, dissipatives)
         self.epr_distributed_analysis.do_EPR_analysis()
 
-    def epr_spectrum_analysis(self, cos_trunc: int = 8, fock_trunc: int = 7):
+    def epr_spectrum_analysis(self, cos_trunc: int = 8, fock_trunc: int = 7, flux: float = 0,  basis: str = 'std', junctions=None):
         """Core epr analysis method.
 
         Args:
             cos_trunc (int, optional): truncation of the cosine. Defaults to 8.
             fock_trunc (int, optional): truncation of the fock. Defaults to 7.
         """
-        self.epr_quantum_analysis = epr.QuantumAnalysis(
-            self.epr_distributed_analysis.data_filename)
+        self.epr_quantum_analysis = epr.QuantumAnalysis(self.epr_distributed_analysis.data_filename)
         self.epr_quantum_analysis.analyze_all_variations(cos_trunc=cos_trunc,
-                                                         fock_trunc=fock_trunc)
+                                                         fock_trunc=fock_trunc,
+                                                         flux=flux,
+                                                         basis=basis,
+                                                         junctions=junctions)
 
     def epr_report_hamiltonian(self,
                                swp_variable: str = "variation",
